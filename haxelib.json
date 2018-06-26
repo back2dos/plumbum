@@ -14,5 +14,7 @@
   "releasenote": "initial release",
   "version": "0.0.0",
   "url": "https://github.com/back2dos/plumbum/",
-  "dependencies": {}
+  "dependencies": {
+    "tink_macro": ""
+  }
 }
