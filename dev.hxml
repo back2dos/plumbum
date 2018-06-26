@@ -1,0 +1,3 @@
+tests.hxml
+-lib travix
+-lib plumbum

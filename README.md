@@ -1,2 +1,3 @@
-# plumbum
-Because plumbing is fun \o/
+# Plumbum
+
+To be documented ...
