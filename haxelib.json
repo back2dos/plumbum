@@ -1,20 +1,20 @@
 {
-  "name": "plumbum",
-  "license": "MIT",
-  "tags": [
-    "plumbing",
-    "glue",
-    "setup",
-    "config"
-  ],
-  "classPath": "src",
-  "contributors": [
-    "back2dos"
-  ],
-  "releasenote": "initial release",
-  "version": "0.0.0",
-  "url": "https://github.com/back2dos/plumbum/",
-  "dependencies": {
-    "tink_macro": ""
-  }
+	"name": "plumbum",
+	"license": "MIT",
+	"tags": [
+		"plumbing",
+		"glue",
+		"setup",
+		"config"
+	],
+	"classPath": "src",
+	"contributors": [
+		"back2dos"
+	],
+	"releasenote": "Initial haxelib release.",
+	"version": "0.0.0",
+	"url": "https://github.com/back2dos/plumbum/",
+	"dependencies": {
+		"tink_macro": ""
+	}
 }
