@@ -53,6 +53,14 @@ class Plumber {
             default: f.pos.error('dependencies must be plain variable');
           }
 
+          fields.push({
+            pos: f.pos,
+            name: f.name,
+            kind: FProp('default', 'never', TAnonymous(dependencies), null),
+          });
+
+          set('dependencies', macro dependencies);
+
         case name:
           switch f.kind {
             case FProp(_, _, null, _): f.pos.error('type required for properties');

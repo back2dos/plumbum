@@ -28,6 +28,6 @@ class Example2 implements plumbum.Scope {
     function bar(x:String):String;
   }
   // public var result3:String = result; <-- this line should not compile
-  public var result:String = bar(foo);
+  public var result:String = bar(dependencies.foo);
   public var result2:String = result + result;
 }
