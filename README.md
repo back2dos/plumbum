@@ -1,4 +1,6 @@
-# Plumbum
+# Plumbum [![Build Status](https://travis-ci.org/back2dos/plumbum.svg?branch=master)](https://travis-ci.org/back2dos/plumbum)
+
+<img src="https://raw.githubusercontent.com/back2dos/plumbum/master/pb.png" height=100>
 
 This library offers a mechanism for organizing the internal plumbing of an application into distinct scopes, which are:
 
