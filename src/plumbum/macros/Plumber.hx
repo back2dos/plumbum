@@ -25,6 +25,12 @@ class Plumber {
     triage();
     processDependencies();
     processDeclarations();
+    if (strict)
+      fields = fields.concat((macro class {
+        static function __plumbub__check()
+          if (false) ${EVars(vars).at()}
+      }).fields);
+
     makeConstructor();
   }
 
@@ -126,7 +132,7 @@ class Plumber {
     vars.push({
       name: 'dependencies',
       type: TAnonymous(dependencies),
-      expr: null,
+      expr: macro null,
     });
     
     for (d in dependencies) {
@@ -195,9 +201,6 @@ class Plumber {
 
   function processDeclarations()
     for (part in declarations) {
-
-      if (strict)
-        part.expr.typeof(vars).sure();
       
       var name = part.name,
           type = part.type,
