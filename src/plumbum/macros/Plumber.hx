@@ -212,6 +212,7 @@ class Plumber {
       fields.push({
         name: name,
         pos: pos,
+        meta: part.meta,
         kind: FProp('get', 'never', type, null),
         access: [if (part.isPublic) APublic else APrivate],
       });
