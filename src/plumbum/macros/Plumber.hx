@@ -239,7 +239,7 @@ class Plumber {
         pos: pos,
         meta: NO_COMPLETION
       });
-      trace(expr.toString() + ':' + lazyType.toString());
+      
       set(lazyName, macro @:pos(pos) (function () return ($expr : $type):$lazyType));
       
     }
