@@ -193,7 +193,7 @@ class Plumber {
           if (e != null)
             e.reject('expression not supported here yet');
           
-          add(t, null);
+          add(t);
 
         case FFun(f):
           
