@@ -139,26 +139,46 @@ class Plumber {
       
       var name = d.name;
 
-      function add(type, ?expr) {
-        var init = macro @:pos(d.pos) dependencies.$name;
+      var lazy = false;
+
+      switch d.meta {
+        case null | []:
+        case [{ name: ':lazy' }]:
+          lazy = true;
+        case v: v[0].pos.error('no meta data except `@:lazy` allowed on dependencies');
+      }
+
+      function add(type) {
+        
         vars.push({
           type: type,
-          expr: macro @:pos(d.pos) dependencies.$name,
+          expr: macro cast null,
           name: name
         });      
 
         fields.push({
           name: name, 
           pos: d.pos,
-          kind: FProp('default', 'never', type),
+          kind: FProp('get', 'never', type),
         });
 
-        set(name, init);
-      }
-
-      switch d.meta {
-        case null | []:
-        case v: v[0].pos.error('no meta data allowed on dependencies');
+        var body = macro @:pos(d.pos) dependencies.$name;
+        
+        if (lazy) {
+          d.kind = FProp('default', 'never', macro : plumbum.macros.Lazy<$type>);
+          body = macro @:pos(d.pos) $body.get();
+        }
+        
+        fields.push({
+          name: 'get_$name', 
+          pos: d.pos,
+          access: [AInline],
+          kind: FFun({
+            args: [],
+            ret: type,
+            expr: macro @:pos(body.pos) return $body,
+          }),
+        });
       }
 
       switch d.kind {
