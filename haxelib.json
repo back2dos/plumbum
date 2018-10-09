@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Remove leftover nonsense.",
-	"version": "0.0.1",
+	"releasenote": "Improve error reporting again.",
+	"version": "0.0.2",
 	"url": "https://github.com/back2dos/plumbum/",
 	"dependencies": {
 		"tink_macro": ""
