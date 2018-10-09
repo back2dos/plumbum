@@ -20,19 +20,27 @@ class Plumber {
 
   var strict:Bool;
 
+  static var INVALID_ACCESS = ~/cannot access (.*) in static function/i;
+
   function new() {
     strict = !cls.meta.has(':lenient');
     triage();
     processDependencies();
     processDeclarations();
     if (strict) {
-      var name = MacroApi.tempName();
-      var cl = macro class $name {
+      var check = (function () {
+        switch EVars(vars).at(cls.pos).typeof() {
+          case Failure(e): 
+            if (INVALID_ACCESS.match(e.message)) e.pos.error('Field ${INVALID_ACCESS.matched(1)} accessed out of order');
+            else e.throwSelf();
+          default:
+        }
+        return macro null;
+      }).bounce();
+      fields = fields.concat((macro class {
         static function __plumbub__check()
-          if (false) ${EVars(vars).at()}
-      };
-      cl.pos = cls.pos;
-      defineType(cl);
+          ${check}
+      }).fields);
     }
 
     makeConstructor();
