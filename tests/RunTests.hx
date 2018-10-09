@@ -3,9 +3,9 @@ package ;
 class RunTests {
 
   static function main() {
-    function assertEq<T>(found:T, expected:T) {
+    function assertEq<T>(found:T, expected:T, ?pos:haxe.PosInfos) {
       if (found != expected) {
-        trace('expected $expected but found $found');
+        haxe.Log.trace('expected $expected but found $found', pos);
         travix.Logger.exit(500);
       }
     }
@@ -39,7 +39,7 @@ class Example2 implements plumbum.Scope {
   var dependencies:{
     var foo:String;
     function bar(x:String):String;
-    var blub:String;
+    @:lazy var blub:String;
   }
   // public var result4:String = result; //<-- this line should not compile
   public var result:String = bar(dependencies.foo);
