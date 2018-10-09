@@ -25,11 +25,15 @@ class Plumber {
     triage();
     processDependencies();
     processDeclarations();
-    if (strict)
-      fields = fields.concat((macro class {
+    if (strict) {
+      var name = MacroApi.tempName();
+      var cl = macro class $name {
         static function __plumbub__check()
           if (false) ${EVars(vars).at()}
-      }).fields);
+      };
+      cl.pos = cls.pos;
+      defineType(cl);
+    }
 
     makeConstructor();
   }
