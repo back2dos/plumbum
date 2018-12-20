@@ -1,3 +1,4 @@
 -cp tests
+-lib tink_lang
 -main RunTests
 -dce full

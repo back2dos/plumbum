@@ -113,6 +113,10 @@ class Plumber {
                 type: macro : Dynamic, 
               });
 
+            #if tink_lang
+            case FVar(_, _) if (f.metaNamed(':computed').length > 0):
+              fields.push(f);
+            #end
             case FVar(_, null): f.pos.error('initialization required'); 
             case FVar(t, e): 
               var f:Field = f;
