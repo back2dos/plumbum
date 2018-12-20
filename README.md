@@ -16,15 +16,35 @@ This library offers a mechanism for organizing the internal plumbing of an appli
 Every scope can define it's external dependencies with a special variable:
 
 ```haxe
-class Example {
+class Button {
   var dependencies:{
     var enabled:Bool;
+    var label:String;
     function onclick():Void;
   }
 }
 ```
 
 These dependencies will be used as the single constructor argument and will be stored into separate fields. You may refer to the `enabled` field as both `enabled` or `dependencies.enabled`.
+
+#### Optional Dependencies
+
+Dependencies can be made optional by providing a default value/implementation.
+
+```haxe
+class Button {
+  var dependencies:{
+    var enabled:Bool = true;
+    var label:String;
+    function onclick():Void {
+      trace('clicked!');
+    }
+  }
+}
+
+//usage: 
+new Button({ label: 'Hello!' });
+```
 
 ### Declarations
 
