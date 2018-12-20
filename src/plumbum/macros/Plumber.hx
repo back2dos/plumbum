@@ -12,6 +12,7 @@ class Plumber {
   var dependencies = [];
   var setup = [];
   var ctorPos = currentPos();
+  
   var postconstruct = null;
   var declarations = [];
   var fields = [];
@@ -160,13 +161,14 @@ class Plumber {
         case v: v[0].pos.error('no meta data except `@:lazy` allowed on dependencies');
       }
 
-      function add(type) {
+      function add(type, dFault) {
         
         vars.push({
           type: type,
           expr: macro cast null,
           name: name
-        });      
+        });
+
 
         fields.push({
           name: name, 
@@ -176,11 +178,21 @@ class Plumber {
 
         var body = macro @:pos(d.pos) dependencies.$name;
         
-        if (lazy) {
-          d.kind = FProp('default', 'never', macro : plumbum.macros.Lazy<$type>);
-          body = macro @:pos(d.pos) $body.get();
+        var dependencyType = 
+          if (lazy) {
+            var t = macro : plumbum.macros.Lazy<$type>;
+            d.kind = FProp('default', 'never', t);
+            body = macro @:pos(d.pos) $body.get();
+            t;
+          }
+          else type;
+
+        if (dFault != null) {
+          d.meta.push({ name: ':optional', params: [], pos: d.pos });
+          var writable = TAnonymous([{ name: name, pos: dFault.pos, kind: FVar(dependencyType)} ]);
+          setup.push(@:pos(dFault.pos) macro if (dependencies.$name == null) (cast dependencies:$writable).$name = $dFault);          
         }
-        
+
         fields.push({
           name: 'get_$name', 
           pos: d.pos,
@@ -201,21 +213,27 @@ class Plumber {
         case FVar(t, e):
           
           d.kind = FProp('default', 'never', t, null);
-          
-          if (e != null)
-            e.reject('expression not supported here yet');
-          
-          add(t);
+          add(t, e);
 
         case FFun(f):
           
-          if (f.expr != null) 
-            f.expr.reject('expression not supported here yet');
-
           function check(expected, type) 
             return 
               if (type == null) d.pos.error('$expected expected');
               else type;
+
+          var dFault = 
+            switch f.expr {
+              case null: null;
+              case e:
+                f.expr = null;
+                EFunction(null, {
+                  args: f.args,
+                  params: f.params,
+                  ret: f.ret,
+                  expr: e
+                }).at(e.pos);
+            }
 
           add(
             TFunction(
@@ -225,7 +243,8 @@ class Plumber {
                 else t;
               }], 
               check('return type', f.ret)
-            )
+            ),
+            dFault
           );
       }
     }    
