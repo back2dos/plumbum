@@ -6,13 +6,13 @@ import haxe.macro.Expr;
 using tink.MacroApi;
 
 class Plumber {
-  
+
   static var NO_COMPLETION = [{ name: ':noCompletion', params: [], pos: (macro null).pos }];
 
   var dependencies = [];
   var setup = [];
   var ctorPos = currentPos();
-  
+
   var postconstruct = null;
   var declarations = [];
   var fields = [];
@@ -31,7 +31,7 @@ class Plumber {
     if (strict) {
       var check = (function () {
         switch EVars(vars).at(cls.pos).typeof() {
-          case Failure(e): 
+          case Failure(e):
             if (INVALID_ACCESS.match(e.message)) e.pos.error('Field ${INVALID_ACCESS.matched(1)} accessed out of order');
             else e.throwSelf();
           default:
@@ -47,15 +47,15 @@ class Plumber {
     makeConstructor();
   }
 
-  function triage() 
+  function triage()
     for (f in (getBuildFields():Array<Member>))
       if (f.isStatic) fields.push(f);
       else switch f.name {
-        
+
         case 'new':
 
           switch f.kind {
-            case FFun({ args: [], expr: body }): 
+            case FFun({ args: [], expr: body }):
               ctorPos = f.pos;
               postconstruct = body;
             case FFun(_): f.pos.error('no arguments allowed in constructor');
@@ -63,7 +63,7 @@ class Plumber {
           }
 
         case 'dependencies':
-          
+
           switch f.kind {
             case FVar(TAnonymous(fields), null): dependencies = fields;
             case FVar(null, _): f.pos.error('type required for dependencies');
@@ -83,16 +83,16 @@ class Plumber {
         case name:
           switch f.kind {
             case FProp(_, _, null, _): f.pos.error('type required for properties');
-            case FProp('get', 'set' | 'never', t, e): 
-              
+            case FProp('get', 'set' | 'never', t, e):
+
               switch f.extractMeta(':isVar') {
                 case Success(tag): tag.pos.error('cannot use @:isVar here');
                 default:
               }
-              
+
               if (e != null)
                 e.reject('expression not allowed here');
-              
+
               fields.push(f);
 
               vars.push({
@@ -103,24 +103,24 @@ class Plumber {
 
 
             case FProp(_, _, _, _): f.pos.error('properties not supported yet');
-            case FFun(_): 
+            case FFun(_):
 
               fields.push(f);
 
               vars.push({
                 name: name,
                 expr: macro null,
-                type: macro : Dynamic, 
+                type: f.pos.makeBlankType(),
               });
 
             #if tink_lang
             case FVar(_, _) if (f.metaNamed(':computed').length > 0):
               fields.push(f);
             #end
-            case FVar(_, null): f.pos.error('initialization required'); 
-            case FVar(t, e): 
+            case FVar(_, null): f.pos.error('initialization required');
+            case FVar(t, e):
               var f:Field = f;
-              
+
               declarations.push({
                 name: name,
                 pos: f.pos,
@@ -136,7 +136,7 @@ class Plumber {
           }
       }
 
-  function set(name:String, expr:Expr) 
+  function set(name:String, expr:Expr)
     setup.push(
       (function () {
         var target = storeTypedExpr(typeExpr(macro @:pos(expr.pos) this.$name));
@@ -145,15 +145,15 @@ class Plumber {
     );
 
   function processDependencies() {
-    
+
     vars.push({
       name: 'dependencies',
       type: TAnonymous(dependencies),
       expr: macro null,
     });
-    
+
     for (d in dependencies) {
-      
+
       var name = d.name;
 
       var lazy = false;
@@ -166,7 +166,7 @@ class Plumber {
       }
 
       function add(type, dFault) {
-        
+
         vars.push({
           type: type,
           expr: macro cast null,
@@ -175,14 +175,14 @@ class Plumber {
 
 
         fields.push({
-          name: name, 
+          name: name,
           pos: d.pos,
           kind: FProp('get', 'never', type),
         });
 
         var body = macro @:pos(d.pos) dependencies.$name;
-        
-        var dependencyType = 
+
+        var dependencyType =
           if (lazy) {
             var t = macro : plumbum.macros.Lazy<$type>;
             d.kind = FProp('default', 'never', t);
@@ -194,11 +194,11 @@ class Plumber {
         if (dFault != null) {
           d.meta.push({ name: ':optional', params: [], pos: d.pos });
           var writable = TAnonymous([{ name: name, pos: dFault.pos, kind: FVar(dependencyType)} ]);
-          setup.push(@:pos(dFault.pos) macro if (dependencies.$name == null) (cast dependencies:$writable).$name = $dFault);          
+          setup.push(@:pos(dFault.pos) macro if (dependencies.$name == null) (cast dependencies:$writable).$name = $dFault);
         }
 
         fields.push({
-          name: 'get_$name', 
+          name: 'get_$name',
           pos: d.pos,
           access: [AInline],
           kind: FFun({
@@ -210,23 +210,23 @@ class Plumber {
       }
 
       switch d.kind {
-        
+
         case FVar(null, _): d.pos.error('type required');
         case FProp(_, _, _, _): d.pos.error('property not allowed here');
 
         case FVar(t, e):
-          
+
           d.kind = FProp('default', 'never', t, null);
           add(t, e);
 
         case FFun(f):
-          
-          function check(expected, type) 
-            return 
+
+          function check(expected, type)
+            return
               if (type == null) d.pos.error('$expected expected');
               else type;
 
-          var dFault = 
+          var dFault =
             switch f.expr {
               case null: null;
               case e:
@@ -245,18 +245,18 @@ class Plumber {
                 var t = check('type for argument ${arg.name}', arg.type);
                 if (arg.opt) TOptional(t);
                 else t;
-              }], 
+              }],
               check('return type', f.ret)
             ),
             dFault
           );
       }
-    }    
+    }
   }
 
   function processDeclarations()
     for (part in declarations) {
-      
+
       var name = part.name,
           type = part.type,
           expr = part.expr,
@@ -294,9 +294,9 @@ class Plumber {
         pos: pos,
         meta: NO_COMPLETION
       });
-      
+
       set(lazyName, macro @:pos(pos) (function () return ($expr : $type):$lazyType));
-      
+
     }
 
   function makeConstructor() {
@@ -315,7 +315,7 @@ class Plumber {
     });
   }
 
-  static function buildScope() 
+  static function buildScope()
     return new Plumber().fields;
 
 }
