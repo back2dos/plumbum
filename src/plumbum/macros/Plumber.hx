@@ -1,5 +1,6 @@
 package plumbum.macros;
 
+#if macro
 import haxe.macro.Context.*;
 import haxe.macro.Expr;
 
@@ -75,7 +76,7 @@ class Plumber {
           fields.push({
             pos: f.pos,
             name: f.name,
-            kind: FProp('default', 'never', TAnonymous(dependencies), null),
+            kind: FProp('default', 'never', dependencyType(), null),
           });
 
           set('dependencies', macro dependencies);
@@ -148,7 +149,7 @@ class Plumber {
 
     vars.push({
       name: 'dependencies',
-      type: TAnonymous(dependencies),
+      type: dependencyType(),
       expr: macro null,
     });
 
@@ -299,6 +300,11 @@ class Plumber {
 
     }
 
+  function dependencyType() {
+    var anon = TAnonymous(dependencies);
+    return macro : plumbum.helpers.Dependencies<$anon>;
+  }
+
   function makeConstructor() {
     if (postconstruct != null)
       setup.push(postconstruct);
@@ -308,7 +314,7 @@ class Plumber {
       name: 'new',
       access: [APublic],
       kind: FFun({
-        args: [{ name: 'dependencies', type: TAnonymous(dependencies) }],
+        args: [{ name: 'dependencies', type: dependencyType() }],
         ret: macro : Void,
         expr: setup.toBlock(ctorPos),
       }),
@@ -319,3 +325,4 @@ class Plumber {
     return new Plumber().fields;
 
 }
+#end
