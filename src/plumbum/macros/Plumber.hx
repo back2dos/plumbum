@@ -31,7 +31,7 @@ class Plumber {
     processDeclarations();
     if (strict) {
       var check = (function () {
-        switch (macro $b{vars.map(v -> EVars([v]).at(v.expr == null ? cls.pos : v.expr.pos))}).typeof() {
+        switch (macro $b{vars.map(v -> EVars([v]).at(v.expr.pos))}).typeof() {
           case Failure(e):
             if (INVALID_ACCESS.match(e.message)) e.pos.error('Field ${INVALID_ACCESS.matched(1)} accessed out of order');
             else e.throwSelf();
