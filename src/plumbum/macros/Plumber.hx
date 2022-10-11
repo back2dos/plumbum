@@ -121,6 +121,11 @@ class Plumber {
             case FVar(_, null): f.pos.error('initialization required');
             case FVar(t, e):
               var f:Field = f;
+              if (t == null)
+                  t = switch (e.typeof()) {
+                      case Failure(_): f.pos.error('Missing type hint');
+                      case Success(t): t.toComplex();
+                  }
 
               declarations.push({
                 name: name,
